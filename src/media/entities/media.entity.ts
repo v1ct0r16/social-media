@@ -6,13 +6,12 @@ import { Base } from './base.entity';
 export class Media extends Base {
 
   @Column()
-  username: string;
+  title: string;
 
   @Column()
-  password: string;
+  note: string;
 
-  @Column({unique: true})
-  email: string;
+  
 
 //   @Column({
 //     type:'enum',
