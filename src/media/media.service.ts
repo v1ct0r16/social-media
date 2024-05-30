@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateMediaDto } from './dto/create-media.dto';
 import { UpdateMediaDto } from './dto/update-media.dto';
 import { Media } from './entities/media.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { title } from 'process';
 
 @Injectable()
 export class MediaService {
@@ -13,8 +14,8 @@ export class MediaService {
   ) {}
 
   createpost(createMediaDto: CreateMediaDto) {
-    const savePost = new this.mediaRepository(createMediaDto);
-    savePost.save();
+       const add = this.mediaRepository.create(createMediaDto);
+        return this.mediaRepository.save(add);
     // return 'This action adds a new media';
   }
 
@@ -28,28 +29,31 @@ export class MediaService {
     // return `This action returns all media`;
   }
 
-  findOne(id: number) {
+  async findOneByName(title :string): Promise<Media>{
+        const find = await this.mediaRepository.findOne({ where: {title: title},});
+        return(find)
+
+  }
+
+  findOne(id: string) {
     return `This action returns a #${id} media`;
   }
 
-  async updatepost(title: string, updatepost) {
-    try {
-      const updatePost = await this.mediaRepository.findOne(title);
 
-      if (!updatePost) {
-        throw new NotFoundException(`post with not found`);
-      }
-
-      Object.assign(updatepost, updatepost);
-
-      await updatepost.save();
-      return updatepost;
-    } catch (error) {
-      throw new NotFoundException(`Failed to Update post with the title`);
+  async updateProductByName(
+    name: string,
+    payload: Partial<Media>,
+): Promise<Media> {
+    const user = await this.mediaRepository.findOne({ where: { title } });
+    if (!user) {
+        throw new HttpException('Product not found', 404); // it will be a  404 eroor, meaning not found
     }
-  }
+//Merge the payload into the existing product entity
+Object.assign(user, payload);
+return this.mediaRepository.save(user)
+} 
 
-  async  deleteSale(title: string){
+  async  deletePost(title: string){
     try {
       const deleteIt = await this.mediaRepository.delete(title);
       if(!deleteIt) {
